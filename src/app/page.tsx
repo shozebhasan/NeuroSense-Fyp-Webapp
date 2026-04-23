@@ -1,63 +1,239 @@
-import Image from "next/image";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
-export default function Home() {
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    redirect("/chat");
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg-base)",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Background grid */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)
+          `,
+          backgroundSize: "48px 48px",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          top: "-20%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "900px",
+          height: "700px",
+          background:
+            "radial-gradient(ellipse at center, rgba(255,255,255,0.04) 0%, transparent 65%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Nav */}
+      <nav
+        style={{
+          position: "relative",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "20px 40px",
+          borderBottom: "1px solid var(--border-subtle)",
+          backdropFilter: "blur(12px)",
+          background: "rgba(8,8,8,0.7)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "7px",
+              background: "linear-gradient(135deg, #fff 0%, #888 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"
+                fill="#000"
+              />
+            </svg>
+          </div>
+          <span
+            style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: "17px",
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.3px",
+            }}
+          >
+            Neuro Sense
+          </span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div style={{ display: "flex", gap: "12px" }}>
+          <Link
+            href="/login"
+            style={{
+              padding: "8px 18px",
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 500,
+              borderRadius: "var(--radius)",
+              border: "1px solid var(--border)",
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Sign in
+          </Link>
+          <Link
+            href="/signup"
+            style={{
+              padding: "8px 18px",
+              background: "var(--text-primary)",
+              color: "var(--bg-base)",
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 600,
+              borderRadius: "var(--radius)",
+            }}
           >
-            Documentation
-          </a>
+            Get started
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <main
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "80px 24px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "6px 14px",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: "100px",
+            marginBottom: "32px",
+            fontSize: "12px",
+            color: "var(--text-secondary)",
+            letterSpacing: "0.5px",
+            textTransform: "uppercase",
+            fontWeight: 500,
+          }}
+        >
+          <div
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: "#4ade80",
+            }}
+          />
+          Now available
+        </div>
+
+        <h1
+          style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: "clamp(42px, 7vw, 80px)",
+            fontWeight: 800,
+            color: "var(--text-primary)",
+            letterSpacing: "-2px",
+            lineHeight: 1.05,
+            marginBottom: "24px",
+            maxWidth: "800px",
+          }}
+        >
+          Intelligence that
+          <br />
+          <span style={{ color: "var(--text-muted)" }}>adapts to you</span>
+        </h1>
+
+        <p
+          style={{
+            color: "var(--text-secondary)",
+            fontSize: "18px",
+            lineHeight: 1.7,
+            maxWidth: "520px",
+            marginBottom: "40px",
+          }}
+        >
+          Neuro Sense is your AI workspace — built for deep thinking, fast
+          answers, and seamless conversation.
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          <Link
+            href="/signup"
+            style={{
+              padding: "14px 32px",
+              background: "var(--text-primary)",
+              color: "var(--bg-base)",
+              textDecoration: "none",
+              fontSize: "15px",
+              fontWeight: 600,
+              borderRadius: "var(--radius)",
+            }}
+          >
+            Start for free
+          </Link>
+          <Link
+            href="/login"
+            style={{
+              padding: "14px 32px",
+              background: "transparent",
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              fontSize: "15px",
+              fontWeight: 500,
+              borderRadius: "var(--radius)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            Sign in
+          </Link>
         </div>
       </main>
     </div>
