@@ -2,7 +2,11 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { signOut } from "next-auth/react";
-import { useTheme } from "@/context/ThemeContext";
+import { Red_Rose, Space_Mono } from "next/font/google";
+import { motion, AnimatePresence } from "framer-motion";
+
+const redrose = Red_Rose({ subsets: ["latin"], weight: "700" });
+const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"] });
 
 interface Message {
   id: string;
@@ -25,28 +29,8 @@ const SUGGESTIONS = [
   "Give me a daily walk plan?",
   "Analyze my Reports",
   "What is a stable blood pressure for a 30 year old",
-  "How much wawter should i drink daily?",
+  "How much water should I drink daily?",
 ];
-
-function SunIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-    </svg>
-  );
-}
 
 function Spinner({ size = 14 }: { size?: number }) {
   return (
@@ -58,15 +42,19 @@ function Spinner({ size = 14 }: { size?: number }) {
 
 function TypingDots() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 0" }}>
+    <div className="flex items-center gap-1.5 py-1">
       {[0, 1, 2].map((i) => (
-        <div key={i} style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--text-muted)", animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+        <motion.div
+          key={i}
+          className="w-1.5 h-1.5 rounded-full bg-slate-400"
+          animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
+        />
       ))}
     </div>
   );
 }
 
-// Group conversations by relative date
 function groupByDate(convs: Conversation[]) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -92,8 +80,6 @@ function groupByDate(convs: Conversation[]) {
 }
 
 export default function ChatInterface({ user }: Props) {
-  const { theme, toggle } = useTheme();
-
   // Chat state
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -120,12 +106,10 @@ export default function ChatInterface({ user }: Props) {
     ? user.name.slice(0, 2).toUpperCase()
     : user?.email?.slice(0, 2).toUpperCase() ?? "NS";
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Load conversation list on mount
   const fetchConversations = useCallback(async () => {
     setConvsLoading(true);
     try {
@@ -141,7 +125,6 @@ export default function ChatInterface({ user }: Props) {
 
   useEffect(() => { fetchConversations(); }, [fetchConversations]);
 
-  // Load a specific conversation's messages
   const loadConversation = async (convId: number) => {
     if (loadingConvId === convId) return;
     setLoadingConvId(convId);
@@ -167,7 +150,6 @@ export default function ChatInterface({ user }: Props) {
     }
   };
 
-  // Delete a conversation
   const deleteConversation = async (convId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setDeletingId(convId);
@@ -184,7 +166,6 @@ export default function ChatInterface({ user }: Props) {
     }
   };
 
-  // Start a fresh chat (no ID yet — gets created on first send)
   const startNewChat = () => {
     setMessages([]);
     setCurrentConvId(null);
@@ -234,14 +215,11 @@ export default function ChatInterface({ user }: Props) {
         return;
       }
 
-      // If new conversation was created, update state + sidebar
       if (data.conversationId && !currentConvId) {
         setCurrentConvId(data.conversationId);
         setActiveConvId(data.conversationId);
-        // Refresh sidebar to show new conversation
         fetchConversations();
       } else if (data.conversationId) {
-        // Bump updated_at in sidebar without full refetch
         setConversations((prev) =>
           prev.map((c) =>
             c.id === data.conversationId ? { ...c, updated_at: new Date().toISOString() } : c
@@ -271,62 +249,54 @@ export default function ChatInterface({ user }: Props) {
 
   const grouped = groupByDate(conversations);
 
-  // ── styles ──
-  const s = {
-    sidebarBtn: {
-      width: "100%", padding: "8px 12px", background: "transparent",
-      border: "1px solid var(--border)", borderRadius: "var(--radius)",
-      color: "var(--text-secondary)", fontSize: "13px", cursor: "pointer",
-      display: "flex", alignItems: "center", gap: "7px", transition: "all 0.15s",
-      fontFamily: "'Inter', sans-serif",
-    } as React.CSSProperties,
-  };
-
   return (
-    <div style={{ display: "flex", height: "100vh", background: "var(--bg-base)", overflow: "hidden", fontFamily: "'Inter', sans-serif" }}>
-
+    <div className="flex h-screen overflow-hidden bg-blue-50">
       {/* ══ SIDEBAR ══ */}
-      <aside style={{
-        width: sidebarOpen ? "256px" : "0", minWidth: sidebarOpen ? "256px" : "0",
-        background: "var(--bg-surface)", borderRight: "1px solid var(--border-subtle)",
-        display: "flex", flexDirection: "column", overflow: "hidden",
-        transition: "all 0.2s ease", flexShrink: 0,
-      }}>
-
+      <motion.aside
+        initial={false}
+        animate={{ width: sidebarOpen ? 256 : 0, minWidth: sidebarOpen ? 256 : 0 }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+        className="bg-white border-r border-blue-100 flex flex-col overflow-hidden flex-shrink-0"
+      >
         {/* Logo */}
-        <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-          <div style={{ width: "22px", height: "22px", borderRadius: "5px", background: "linear-gradient(135deg, #d0d0d0 0%, #606060 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="#111"/>
+        <div className="p-3.5 border-b border-blue-100 flex items-center gap-2 flex-shrink-0">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
             </svg>
           </div>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.1px" }}>Neuro Sense</span>
+          <span className={`${redrose.className} text-sm font-bold text-blue-600`}>
+            Neuro Sense
+          </span>
         </div>
 
-        {/* New chat */}
-        <div style={{ padding: "10px", flexShrink: 0 }}>
-          <button onClick={startNewChat} style={s.sidebarBtn}
-            onMouseEnter={(e) => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "var(--bg-elevated)"; b.style.color = "var(--text-primary)"; }}
-            onMouseLeave={(e) => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "transparent"; b.style.color = "var(--text-secondary)"; }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {/* New chat button */}
+        <div className="p-2.5 flex-shrink-0">
+          <button
+            onClick={startNewChat}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 border border-blue-200 bg-blue-50/50 hover:bg-blue-100 text-blue-600"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
             New conversation
           </button>
         </div>
 
-        {/* ── HISTORY ── */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 8px 8px" }}>
+        {/* Conversation History */}
+        <div className="flex-1 overflow-y-auto px-2 pb-2">
           {convsLoading ? (
-            <div style={{ display: "flex", justifyContent: "center", padding: "24px 0", color: "var(--text-muted)" }}>
+            <div className="flex justify-center py-6 text-slate-400">
               <Spinner size={16} />
             </div>
           ) : conversations.length === 0 ? (
-            <p style={{ fontSize: "12px", color: "var(--text-muted)", textAlign: "center", padding: "24px 12px" }}>
+            <p className="text-xs text-center text-slate-500 py-6 px-3">
               No conversations yet.<br/>Start chatting to save history.
             </p>
           ) : (
             grouped.map(([label, convs]) => (
-              <div key={label} style={{ marginBottom: "8px" }}>
-                <p style={{ fontSize: "10px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.6px", padding: "10px 8px 5px" }}>
+              <div key={label} className="mb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-2 py-2">
                   {label}
                 </p>
                 {convs.map((conv) => (
@@ -335,53 +305,37 @@ export default function ChatInterface({ user }: Props) {
                     onClick={() => loadConversation(conv.id)}
                     onMouseEnter={() => setHoveredId(conv.id)}
                     onMouseLeave={() => setHoveredId(null)}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "6px",
-                      padding: "7px 8px",
-                      borderRadius: "var(--radius)",
-                      cursor: "pointer",
-                      background: activeConvId === conv.id ? "var(--bg-card)" : hoveredId === conv.id ? "var(--bg-elevated)" : "transparent",
-                      border: activeConvId === conv.id ? "1px solid var(--border)" : "1px solid transparent",
-                      transition: "all 0.12s",
-                      marginBottom: "2px",
-                    }}
+                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all duration-150 mb-0.5 ${
+                      activeConvId === conv.id
+                        ? "bg-blue-50 border border-blue-200"
+                        : hoveredId === conv.id
+                        ? "bg-slate-50 border border-transparent"
+                        : "border border-transparent"
+                    }`}
                   >
                     {loadingConvId === conv.id ? (
-                      <div style={{ color: "var(--text-muted)", flexShrink: 0 }}><Spinner size={12} /></div>
+                      <Spinner size={10} />
                     ) : (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" style={{ flexShrink: 0, opacity: 0.6 }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400 flex-shrink-0">
                         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                       </svg>
                     )}
-
-                    {/* Title */}
-                    <span style={{
-                      flex: 1, fontSize: "12px",
-                      color: activeConvId === conv.id ? "var(--text-primary)" : "var(--text-secondary)",
-                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                      lineHeight: 1.4,
-                    }}>
+                    <span className={`flex-1 text-xs truncate ${activeConvId === conv.id ? "text-slate-800 font-medium" : "text-slate-500"}`}>
                       {conv.title}
                     </span>
-
-                    {/* Delete button — appears on hover */}
                     {(hoveredId === conv.id || deletingId === conv.id) && (
                       <button
                         onClick={(e) => deleteConversation(conv.id, e)}
                         disabled={deletingId === conv.id}
-                        style={{
-                          background: "none", border: "none", cursor: "pointer",
-                          color: "var(--text-muted)", padding: "2px", display: "flex",
-                          borderRadius: "4px", flexShrink: 0, transition: "color 0.1s",
-                        }}
-                        onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--error)")}
-                        onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-muted)")}
-                        title="Delete conversation"
+                        className="p-0.5 rounded hover:text-red-500 transition-colors text-slate-400"
                       >
-                        {deletingId === conv.id
-                          ? <Spinner size={11} />
-                          : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                        }
+                        {deletingId === conv.id ? (
+                          <Spinner size={10} />
+                        ) : (
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>
+                          </svg>
+                        )}
                       </button>
                     )}
                   </div>
@@ -391,140 +345,143 @@ export default function ChatInterface({ user }: Props) {
           )}
         </div>
 
-        {/* ── BOTTOM: theme + user + logout ── */}
-        <div style={{ borderTop: "1px solid var(--border-subtle)", flexShrink: 0 }}>
-
-          {/* Theme row */}
-          <div style={{ padding: "10px 14px 6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-muted)" }}>
-              {theme === "dark" ? <MoonIcon /> : <SunIcon />}
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                {theme === "dark" ? "Dark" : "Light"}
-              </span>
-            </div>
-            {/* Toggle switch */}
-            <button onClick={toggle} style={{ width: "36px", height: "20px", borderRadius: "10px", border: "1px solid var(--border-strong)", background: theme === "dark" ? "var(--bg-card)" : "var(--bg-elevated)", cursor: "pointer", position: "relative", transition: "all 0.2s", padding: 0 }}>
-              <div style={{ position: "absolute", top: "2px", left: theme === "dark" ? "2px" : "16px", width: "14px", height: "14px", borderRadius: "50%", background: theme === "dark" ? "var(--text-muted)" : "var(--text-secondary)", transition: "left 0.2s ease" }} />
-            </button>
-          </div>
-
+        {/* Bottom section */}
+        <div className="border-t border-blue-100 flex-shrink-0">
           {/* User info */}
-          <div style={{ padding: "6px 14px 8px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "var(--bg-card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", flexShrink: 0 }}>
+          <div className="px-3.5 py-3 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full border border-blue-200 flex items-center justify-center text-[10px] font-semibold text-slate-500 flex-shrink-0 bg-blue-50">
               {initials}
             </div>
-            <div style={{ overflow: "hidden", flex: 1 }}>
-              <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.3 }}>
+            <div className="overflow-hidden flex-1">
+              <div className="text-xs font-medium text-slate-700 truncate">
                 {user?.name || "User"}
               </div>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "1px" }}>
+              <div className="text-[10px] text-slate-400 truncate">
                 {user?.email}
               </div>
             </div>
           </div>
 
-          {/* Logout */}
-          <div style={{ padding: "0 10px 12px" }}>
-            <button onClick={handleLogout} disabled={loggingOut}
-              style={{ ...s.sidebarBtn, color: loggingOut ? "var(--text-muted)" : "var(--text-secondary)", cursor: loggingOut ? "not-allowed" : "pointer" }}
-              onMouseEnter={(e) => { if (loggingOut) return; const b = e.currentTarget as HTMLButtonElement; b.style.background = "rgba(248,113,113,0.07)"; b.style.borderColor = "rgba(248,113,113,0.3)"; b.style.color = "var(--error)"; }}
-              onMouseLeave={(e) => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "transparent"; b.style.borderColor = "var(--border)"; b.style.color = "var(--text-secondary)"; }}>
-              {loggingOut ? <><Spinner size={13} />Signing out…</> : (
-                <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</>
+          {/* Logout button */}
+          <div className="px-2.5 pb-3">
+            <button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 border border-red-200 hover:bg-red-50 text-red-500"
+            >
+              {loggingOut ? (
+                <><Spinner size={12} />Signing out…</>
+              ) : (
+                <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</>
               )}
             </button>
           </div>
         </div>
-      </aside>
+      </motion.aside>
 
-      {/* ══ MAIN ══ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--bg-base)" }}>
-
-        {/* Topbar */}
-        <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", gap: "10px", background: "var(--bg-base)", flexShrink: 0 }}>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: "5px", display: "flex", borderRadius: "6px", transition: "color 0.15s" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-muted)")}>
+      {/* ══ MAIN CHAT AREA ══ */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar */}
+        <div className="px-4 py-2.5 border-b border-blue-100 flex items-center gap-2 flex-shrink-0 bg-white">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1 rounded hover:bg-blue-50 transition-colors text-slate-400"
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
           </button>
-          {!sidebarOpen && (
-            <button onClick={toggle}
-              style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: "5px", display: "flex", transition: "color 0.15s" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--text-muted)")}>
-              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-            </button>
-          )}
         </div>
 
-        {/* Messages */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 0" }}>
+        {/* Messages container */}
+        <div className="flex-1 overflow-y-auto py-5">
           {messages.length === 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "40px 24px", textAlign: "center" }}>
-              <div style={{ width: "46px", height: "46px", borderRadius: "12px", background: "var(--bg-card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="var(--text-secondary)"/>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center h-full px-6 text-center"
+            >
+              <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center mb-5">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="#3b82f6"/>
                 </svg>
               </div>
-              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "6px", letterSpacing: "-0.3px" }}>
+              <h2 className={`${redrose.className} text-2xl font-bold text-blue-600 mb-1.5`}>
                 How can I help you?
               </h2>
-              <p style={{ color: "var(--text-muted)", fontSize: "13px", marginBottom: "28px" }}>
-                Neuro Sense, Alll rights reserved
+              <p className="text-sm text-slate-500 mb-7">
+                Your health analysis companion
               </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", maxWidth: "480px" }}>
-                {SUGGESTIONS.map((s) => (
-                  <button key={s} onClick={() => { setInput(s); textareaRef.current?.focus(); }}
-                    style={{ padding: "8px 14px", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "100px", color: "var(--text-secondary)", fontSize: "12px", cursor: "pointer", transition: "all 0.15s" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-elevated)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--text-primary)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-surface)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)"; }}>
+              <div className="flex flex-wrap gap-2 justify-center max-w-md">
+                {SUGGESTIONS.map((s, idx) => (
+                  <motion.button
+                    key={s}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.1 }}
+                    onClick={() => { setInput(s); textareaRef.current?.focus(); }}
+                    className="px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-150 border border-blue-200 bg-white hover:bg-blue-50 text-slate-600"
+                  >
                     {s}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
           ) : (
-            <div style={{ maxWidth: "680px", margin: "0 auto", padding: "0 20px" }}>
-              {messages.map((msg) => (
-                <div key={msg.id} style={{ marginBottom: "20px", display: "flex", flexDirection: "column", alignItems: msg.role === "user" ? "flex-end" : "flex-start" }}>
-                  <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "5px", padding: "0 4px" }}>
-                    {msg.role === "user" ? "You" : "Neuro Sense"}
-                  </span>
-                  <div style={{
-                    maxWidth: "82%", padding: "11px 15px",
-                    borderRadius: msg.role === "user" ? "12px 12px 3px 12px" : "12px 12px 12px 3px",
-                    background: msg.role === "user" ? "var(--bg-card)" : "var(--bg-surface)",
-                    border: "1px solid var(--border-subtle)",
-                    color: "var(--text-primary)", fontSize: "14px", lineHeight: 1.65,
-                    whiteSpace: "pre-wrap", wordBreak: "break-word",
-                  }}>
-                    {msg.content}
-                  </div>
-                  <span style={{ fontSize: "10px", color: "var(--text-faint)", marginTop: "4px", padding: "0 4px" }}>
-                    {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-              ))}
+            <div className="max-w-2xl mx-auto px-5">
+              <AnimatePresence>
+                {messages.map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mb-5 flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1 px-1">
+                      {msg.role === "user" ? "You" : "Neuro Sense"}
+                    </span>
+                    <div
+                      className={`max-w-[82%] px-4 py-2.5 rounded-xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
+                        msg.role === "user"
+                          ? "bg-blue-50 border border-blue-200 text-slate-700"
+                          : "bg-white border border-blue-100 text-slate-600"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-1 px-1">
+                      {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
 
               {isTyping && (
-                <div style={{ marginBottom: "20px", display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "5px", padding: "0 4px" }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-5 flex flex-col items-start"
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1 px-1">
                     Neuro Sense
                   </span>
-                  <div style={{ padding: "11px 15px", borderRadius: "12px 12px 12px 3px", background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}>
+                  <div className="px-4 py-2.5 rounded-xl border border-blue-100 bg-white">
                     <TypingDots />
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {chatError && (
-                <div style={{ marginBottom: "16px", padding: "10px 14px", background: "rgba(248,113,113,0.07)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: "var(--radius)", color: "var(--error)", fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-500 text-xs flex items-center gap-2"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
                   {chatError}
-                </div>
+                </motion.div>
               )}
 
               <div ref={messagesEndRef} />
@@ -532,33 +489,51 @@ export default function ChatInterface({ user }: Props) {
           )}
         </div>
 
-        {/* Input */}
-        <div style={{ padding: "12px 20px 18px", borderTop: "1px solid var(--border-subtle)", background: "var(--bg-base)", flexShrink: 0 }}>
-          <div style={{ maxWidth: "680px", margin: "0 auto", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "12px", display: "flex", alignItems: "flex-end", gap: "8px", padding: "9px 10px 9px 14px" }}>
-            <textarea ref={textareaRef} value={input}
-              onChange={(e) => { setInput(e.target.value); autoResize(); }}
-              onKeyDown={handleKeyDown}
-              placeholder="Message Neuro Sense…"
-              rows={1} disabled={isTyping}
-              style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--text-primary)", fontSize: "14px", fontFamily: "'Inter', sans-serif", resize: "none", lineHeight: 1.6, paddingTop: "1px" }}
-            />
-            <button onClick={handleSend} disabled={!input.trim() || isTyping}
-              style={{ width: "32px", height: "32px", borderRadius: "8px", background: input.trim() && !isTyping ? "var(--text-primary)" : "var(--bg-elevated)", border: "none", cursor: input.trim() && !isTyping ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
-              {isTyping
-                ? <Spinner size={13} />
-                : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={input.trim() ? "var(--bg-base)" : "var(--text-muted)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-              }
-            </button>
+        {/* Input area */}
+        <div className="p-3 border-t border-blue-100 flex-shrink-0 bg-white">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-end gap-2 p-2 rounded-xl border border-blue-200 bg-white">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => { setInput(e.target.value); autoResize(); }}
+                onKeyDown={handleKeyDown}
+                placeholder="Message Neuro Sense…"
+                rows={1}
+                disabled={isTyping}
+                className="flex-1 bg-transparent border-none outline-none text-sm resize-none py-1.5 px-2 text-slate-700 placeholder:text-slate-400"
+                style={{ fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || isTyping}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 ${
+                  input.trim() && !isTyping
+                    ? "bg-blue-500 hover:bg-blue-600 text-white"
+                    : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                }`}
+              >
+                {isTyping ? (
+                  <Spinner size={12} />
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 5 19 12"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+            <p className="text-center text-[10px] text-slate-400 mt-2">
+              Enter to send · Shift+Enter for new line
+            </p>
           </div>
-          <p style={{ textAlign: "center", fontSize: "11px", color: "var(--text-faint)", marginTop: "8px" }}>
-            Enter to send · Shift+Enter for new line
-          </p>
         </div>
       </div>
 
       <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-5px); opacity: 1; } }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
       `}</style>
     </div>
   );

@@ -1,241 +1,211 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+"use client";
 
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
+import {
+  Knewave,
+  Space_Mono,
+  Oswald,
+  Hanalei_Fill,
+  Bungee_Inline,
+  Bebas_Neue,
+  Red_Rose,
+  Roboto_Mono,
+  Roboto
+} from "next/font/google";
+import { motion } from "framer-motion";
+import LiquidGlassButton from "@/components/LiquidBtn";
+import { useRouter } from "next/navigation"; 
+import PoweredByAIBadge from "@/components/Badge";
 
-  if (session) {
-    redirect("/chat");
-  }
+const knewave = Knewave({ subsets: ["latin"], weight: "400" });
+const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"] });
+const oswald = Oswald({ subsets: ["latin"], weight: ["400", "700"] });
+const hana = Hanalei_Fill({
+  subsets: ["latin"],
+  weight: "400",
+});
+const bebas = Bebas_Neue({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const bungee = Bungee_Inline({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const redrose = Red_Rose({
+  subsets: ["latin"],
+  weight: "700",
+});
+
+const roboto_mono = Roboto_Mono({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+
+function BlinkingCursor() {
+  return (
+    <motion.span
+      animate={{ opacity: [1, 0, 1] }}
+      transition={{ duration: 1.2, repeat: Infinity }}
+      className="inline-block w-0.75 h-[1.1em] bg-blue-600 ml-1 align-middle"
+    />
+  );
+}
+
+export default function Home() {
+  const router = useRouter()
+  const descLines = [
+    "Meet your AI-powered health assistant.",
+    "Neuro Sense analyzes reports, detects patterns, suggests care plans",
+    "so you can focus on better decisions and faster recovery",
+  ];
 
   return (
     <div
+      className="min-h-screen flex flex-col overflow-hidden"
       style={{
-        minHeight: "100vh",
-        background: "var(--bg-base)",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        overflow: "hidden",
+        backgroundImage: "url('/kh5.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center right",
+        backgroundRepeat: "no-repeat",
+        backgroundColor: "#eff6ff", 
       }}
     >
-      {/* Background grid */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          top: "-20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "900px",
-          height: "700px",
-          background:
-            "radial-gradient(ellipse at center, rgba(255,255,255,0.04) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Nav */}
-      <nav
-        style={{
-          position: "relative",
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "20px 40px",
-          borderBottom: "1px solid var(--border-subtle)",
-          backdropFilter: "blur(12px)",
-          background: "rgba(8,8,8,0.7)",
-        }}
+      <motion.header
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, ease: "easeOut" }}
+        className="flex items-center justify-between px-8 pt-8 md:px-14 md:pt-10"
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "7px",
-              background: "linear-gradient(135deg, #fff 0%, #888 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"
-                fill="#000"
-              />
-            </svg>
-          </div>
-          <span
-            style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: "17px",
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              letterSpacing: "-0.3px",
-            }}
+        <div>
+          <h1
+            className={`${redrose.className} font-sans uppercase text-4xl md:text-5xl lg:text-6xl text-blue-700`}
           >
             Neuro Sense
+          </h1>
+        </div>
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8 }}
+          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500 bg-blue-50/70 backdrop-blur-sm"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600" />
           </span>
-        </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <Link
-            href="/login"
-            style={{
-              padding: "8px 18px",
-              color: "var(--text-secondary)",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--border)",
-            }}
+          <span
+            className={`${spaceMono.className} text-xs text-blue-600 font-medium tracking-widest uppercase`}
           >
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            style={{
-              padding: "8px 18px",
-              background: "var(--text-primary)",
-              color: "var(--bg-base)",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 600,
-              borderRadius: "var(--radius)",
-            }}
+            ANALYZE REPORTS
+          </span>
+        </motion.div>
+      </motion.header>
+
+
+
+      <main className="flex-1 flex flex-col md:flex-row justify-between gap-8 px-8 py-10 md:px-14 md:gap-10">
+
+        <div className="flex-1 flex flex-col justify-center max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6 inline-flex items-center gap-2 w-fit"
           >
-            Get started
-          </Link>
-        </div>
-      </nav>
+            <PoweredByAIBadge />
+          </motion.div>
 
-      {/* Hero */}
-      <main
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: "80px 24px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 14px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: "100px",
-            marginBottom: "32px",
-            fontSize: "12px",
-            color: "var(--text-secondary)",
-            letterSpacing: "0.5px",
-            textTransform: "uppercase",
-            fontWeight: 500,
-          }}
-        >
-          <div
-            style={{
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              background: "#4ade80",
-            }}
-          />
-          Now available
-        </div>
+          <div className="space-y-3">
+            {descLines.map((line, i) => (
+              <motion.p
+                key={i}
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.5 + i * 0.15,
+                  ease: "easeOut",
+                }}
+                className={`font-sans leading-relaxed ${
+                  i === 0 ? "font-extrabold text-4xl" : "font-medium text-xl"
+                }`}
+                style={{ color: i === 0 ? "#1d4ed8" : "#475569" }}
+              >
+                {i === 0 ? (
+                  <>
+                    {line}
+                    <BlinkingCursor />
+                  </>
+                ) : (
+                  line
+                )}
+              </motion.p>
+            ))}
+          </div>
 
-        <h1
-          style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: "clamp(42px, 7vw, 80px)",
-            fontWeight: 800,
-            color: "var(--text-primary)",
-            letterSpacing: "-2px",
-            lineHeight: 1.05,
-            marginBottom: "24px",
-            maxWidth: "800px",
-          }}
-        >
-          Intelligence that
-          <br />
-          <span style={{ color: "var(--text-muted)" }}>adapts to you</span>
-        </h1>
-
-        <p
-          style={{
-            color: "var(--text-secondary)",
-            fontSize: "18px",
-            lineHeight: 1.7,
-            maxWidth: "520px",
-            marginBottom: "40px",
-          }}
-        >
-          Neuro Sense is your AI workspace — built for deep thinking, fast
-          answers, and seamless conversation.
-        </p>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
-          <Link
-            href="/signup"
-            style={{
-              padding: "14px 32px",
-              background: "var(--text-primary)",
-              color: "var(--bg-base)",
-              textDecoration: "none",
-              fontSize: "15px",
-              fontWeight: 600,
-              borderRadius: "var(--radius)",
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="mt-10 flex gap-8"
           >
-            Start for free
-          </Link>
-          <Link
-            href="/login"
-            style={{
-              padding: "14px 32px",
-              background: "transparent",
-              color: "var(--text-secondary)",
-              textDecoration: "none",
-              fontSize: "15px",
-              fontWeight: 500,
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            Sign in
-          </Link>
+            {[
+              { value: "10×", label: "Faster Screening" },
+              { value: "98%", label: "Accuracy Rate" },
+              { value: "24/7", label: "Always On" },
+            ].map(({ value, label }) => (
+              <div key={label} className="flex flex-col gap-1">
+                <span
+                  className={`font-sans font-extrabold text-2xl md:text-3xl text-blue-600`}
+                >
+                  {value}
+                </span>
+                <span
+                  className={`font-sans font-semibold text-[10px] uppercase tracking-widest text-gray-600`}
+                >
+                  {label}
+                </span>
+              </div>
+            ))}
+          </motion.div>
         </div>
+
+        <div className="flex-1 hidden md:block" />
       </main>
+
+      <motion.footer
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1 }}
+        className="flex items-end justify-between px-8 pb-10 md:px-14 md:pb-12 "
+      >
+        <LiquidGlassButton  onClick={() => setTimeout(() => router.push("/signup"), 50)}>
+          Signup For Free
+        </LiquidGlassButton>
+
+        <LiquidGlassButton className="mr-260" onClick={() => setTimeout(() => router.push("/login"), 50)}>
+          Login To Your Account
+        </LiquidGlassButton>
+
+        <div
+          className={`font-sans text-[20px] font-bold uppercase text-gray-600 `}
+        >
+          Neuro Sense © 2026
+        </div>
+
+        
+      </motion.footer>
+
+      
     </div>
   );
 }
