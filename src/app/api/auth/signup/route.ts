@@ -4,19 +4,15 @@ import sql from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, email, password } = await req.json();
+    const body = await req.json();
+    console.log("BODY RECEIVED:", body); 
 
-    // Validation
+    const { username, email, password } = body;
+
+    // VALIDATION
     if (!username || !email || !password) {
       return NextResponse.json(
         { error: "All fields are required" },
-        { status: 400 }
-      );
-    }
-
-    if (username.length < 3 || username.length > 50) {
-      return NextResponse.json(
-        { error: "Username must be between 3 and 50 characters" },
         { status: 400 }
       );
     }

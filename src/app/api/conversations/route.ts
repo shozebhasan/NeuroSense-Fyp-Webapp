@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import sql from "@/lib/db";
 
-// GET /api/conversations — list all conversations for the logged-in user
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -17,12 +16,10 @@ export async function GET() {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const userId = users[0].id;
-
   const conversations = await sql`
     SELECT id, title, created_at, updated_at
     FROM conversations
-    WHERE user_id = ${userId}
+    WHERE user_id = ${users[0].id}
     ORDER BY updated_at DESC
     LIMIT 100
   `;
@@ -30,7 +27,6 @@ export async function GET() {
   return NextResponse.json({ conversations });
 }
 
-// POST /api/conversations — create a new empty conversation
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -44,12 +40,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const userId = users[0].id;
-  const { title } = await req.json().catch(() => ({ title: "New conversation" }));
-
+  const { title } = await req.json().catch(() => ({}));
   const result = await sql`
     INSERT INTO conversations (user_id, title)
-    VALUES (${userId}, ${title ?? "New conversation"})
+    VALUES (${users[0].id}, ${title ?? "New conversation"})
     RETURNING id, title, created_at, updated_at
   `;
 

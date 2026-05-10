@@ -3,10 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import sql from "@/lib/db";
 
-const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-
-const SYSTEM_PROMPT = "Talk casually with the user.";
+const PYTHON_BACKEND = process.env.PYTHON_BACKEND_URL ?? "http://127.0.0.1:8000";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -15,6 +12,7 @@ interface ChatMessage {
 
 export async function POST(req: NextRequest) {
   try {
+    // ── Auth check ──────────────────────────────────────────────────────────
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,16 +20,11 @@ export async function POST(req: NextRequest) {
 
     const { messages, conversationId } = await req.json();
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "messages array required" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: "GEMINI_API_KEY not set" }, { status: 500 });
-    }
-
-    // Get user id
+    // ── Get user from DB ────────────────────────────────────────────────────
     const users = await sql`
       SELECT id FROM users WHERE email = ${session.user.email} LIMIT 1
     `;
@@ -40,15 +33,13 @@ export async function POST(req: NextRequest) {
     }
     const userId = users[0].id;
 
-    // Resolve or create conversation
+    // ── Resolve / create conversation ────────────────────────────────────────
     let convId: number = conversationId;
 
     if (!convId) {
-      // First message — create conversation, use first 60 chars as title
       const firstUserMsg = messages.find((m: ChatMessage) => m.role === "user");
-      const title = firstUserMsg
-        ? firstUserMsg.content.slice(0, 60) + (firstUserMsg.content.length > 60 ? "…" : "")
-        : "New conversation";
+      const raw = firstUserMsg?.content ?? "New conversation";
+      const title = raw.length > 60 ? raw.slice(0, 60) + "…" : raw;
 
       const newConv = await sql`
         INSERT INTO conversations (user_id, title)
@@ -58,51 +49,47 @@ export async function POST(req: NextRequest) {
       convId = newConv[0].id;
     }
 
-    // Save the latest user message to DB
-    const latestUserMsg = messages[messages.length - 1];
-    if (latestUserMsg?.role === "user") {
+    // ── Save user message to DB ─────────────────────────────────────────────
+    const latestMsg = messages[messages.length - 1];
+    if (latestMsg?.role === "user") {
       await sql`
         INSERT INTO messages (conversation_id, role, content)
-        VALUES (${convId}, 'user', ${latestUserMsg.content})
+        VALUES (${convId}, 'user', ${latestMsg.content})
       `;
     }
 
-    // Call Gemini
-    const geminiMessages = messages.map((msg: ChatMessage) => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content }],
-    }));
+    // ── Call Python FastAPI backend ─────────────────────────────────────────
+    let reply: string;
+    try {
+      const backendRes = await fetch(`${PYTHON_BACKEND}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
 
-    const body = {
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: geminiMessages,
-      generationConfig: { temperature: 1, maxOutputTokens: 2048 },
-    };
+      if (!backendRes.ok) {
+        const err = await backendRes.json().catch(() => ({}));
+        return NextResponse.json(
+          { error: (err as { detail?: string }).detail ?? "AI backend error" },
+          { status: backendRes.status }
+        );
+      }
 
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json();
+      const backendData = await backendRes.json();
+      reply = backendData.reply ?? "";
+    } catch {
       return NextResponse.json(
-        { error: errData?.error?.message ?? "Gemini API failed" },
-        { status: response.status }
+        { error: "Could not reach AI backend. Is the Python server running?" },
+        { status: 502 }
       );
     }
 
-    const data = await response.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-    // Save assistant reply to DB
+    // ── Save assistant reply to DB ──────────────────────────────────────────
     await sql`
       INSERT INTO messages (conversation_id, role, content)
       VALUES (${convId}, 'assistant', ${reply})
     `;
 
-    // Bump conversation updated_at
     await sql`
       UPDATE conversations SET updated_at = NOW() WHERE id = ${convId}
     `;

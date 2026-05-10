@@ -3,22 +3,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import sql from "@/lib/db";
 
-// GET /api/conversations/[id] — fetch all messages in a conversation
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const convId = parseInt(params.id);
+  const convId = parseInt(id);
   if (isNaN(convId)) {
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
 
-  // Verify ownership
   const users = await sql`
     SELECT id FROM users WHERE email = ${session.user.email} LIMIT 1
   `;
@@ -41,17 +40,17 @@ export async function GET(
   return NextResponse.json({ messages });
 }
 
-// DELETE /api/conversations/[id] — delete a conversation and all its messages
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params; 
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const convId = parseInt(params.id);
+  const convId = parseInt(id);
   if (isNaN(convId)) {
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
