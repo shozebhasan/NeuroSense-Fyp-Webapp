@@ -9,6 +9,7 @@ import EmptyState from "@/components/chat/EmptyState";
 import ChatMessages, { Message } from "@/components/chat/ChatMessages";
 import ChatInput from "@/components/chat/ChatInput";
 import ReportUploader from "@/components/reports/ReportUploader";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Conversation {
   id: number;
@@ -35,18 +36,15 @@ interface Props {
 }
 
 export default function ChatInterface({ user }: Props) {
-  // ── Center mode ─────────────────────────────────────────────────────────────
   const [centerMode, setCenterMode] = useState<CenterMode>("empty");
   const [activeReport, setActiveReport] = useState<ActiveReport | null>(null);
 
-  // ── Chat state ──────────────────────────────────────────────────────────────
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [chatError, setChatError] = useState("");
   const [currentConvId, setCurrentConvId] = useState<number | null>(null);
 
-  // ── Sidebar state ───────────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [convsLoading, setConvsLoading] = useState(true);
@@ -55,7 +53,6 @@ export default function ChatInterface({ user }: Props) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // ── Load conversations ──────────────────────────────────────────────────────
   const fetchConversations = useCallback(async () => {
     setConvsLoading(true);
     try {
@@ -73,7 +70,6 @@ export default function ChatInterface({ user }: Props) {
     fetchConversations();
   }, [fetchConversations]);
 
-  // ── Load a saved conversation ───────────────────────────────────────────────
   const loadConversation = async (convId: number) => {
     if (loadingConvId === convId) return;
     setLoadingConvId(convId);
@@ -108,7 +104,6 @@ export default function ChatInterface({ user }: Props) {
     }
   };
 
-  // ── Delete conversation ─────────────────────────────────────────────────────
   const deleteConversation = async (convId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setDeletingId(convId);
@@ -123,7 +118,6 @@ export default function ChatInterface({ user }: Props) {
     }
   };
 
-  // ── New chat ────────────────────────────────────────────────────────────────
   const startNewChat = () => {
     setMessages([]);
     setCurrentConvId(null);
@@ -134,7 +128,6 @@ export default function ChatInterface({ user }: Props) {
     setCenterMode("empty");
   };
 
-  // ── Regular chat send ───────────────────────────────────────────────────────
   const handleSend = async () => {
     // If we're in report-chat mode, delegate to report follow-up
     if (centerMode === "report-chat" && activeReport) {
@@ -212,7 +205,6 @@ export default function ChatInterface({ user }: Props) {
     }
   };
 
-  // ── Report follow-up send ───────────────────────────────────────────────────
   const handleReportFollowup = async () => {
     if (!input.trim() || isTyping || !activeReport) return;
 
@@ -281,7 +273,6 @@ export default function ChatInterface({ user }: Props) {
     }
   };
 
-  // ── Report analysis complete ────────────────────────────────────────────────
   const handleAnalysisComplete = (data: {
     reportId: number;
     conversationId: number;
@@ -311,7 +302,6 @@ export default function ChatInterface({ user }: Props) {
     await signOut({ callbackUrl: "/login" });
   };
 
-  // ── Determine what to show in the center ───────────────────────────────────
   const showUploader = centerMode === "report-upload";
   const showMessages =
     (centerMode === "chat" || centerMode === "report-chat") &&
@@ -340,7 +330,7 @@ export default function ChatInterface({ user }: Props) {
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
         <TopNav />
 
-        {/* ── CENTER AREA ── */}
+        {/* Center section */}
         {showUploader && (
           <ReportUploader
             onAnalysisComplete={handleAnalysisComplete}
@@ -358,7 +348,7 @@ export default function ChatInterface({ user }: Props) {
           />
         )}
 
-        {/* ── INPUT — hidden during upload ── */}
+        {/* Chatinput hidden during file upload */}
         {!showUploader && (
           <ChatInput
             value={input}

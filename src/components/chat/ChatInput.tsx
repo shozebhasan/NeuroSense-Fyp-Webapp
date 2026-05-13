@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import PlusMenu from "@/components/chat/PlusMenu";
 
 interface ChatInputProps {
@@ -27,6 +27,21 @@ function Spinner() {
   );
 }
 
+// Pulse ring animation for recording state
+function RecordingRing() {
+  return (
+    <span className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-30 pointer-events-none" />
+  );
+}
+
+// Extend Window to include SpeechRecognition types
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export default function ChatInput({
   value,
   onChange,
@@ -37,6 +52,23 @@ export default function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const plusBtnRef = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Voice state
+  const [isRecording, setIsRecording] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  // Keep a ref to the latest `value` so the interim/final handlers can read it
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  // Check browser support once on mount
+  useEffect(() => {
+    const SpeechRecognitionAPI =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    setSpeechSupported(!!SpeechRecognitionAPI);
+  }, []);
 
   const autoResize = () => {
     const ta = textareaRef.current;
@@ -52,6 +84,72 @@ export default function ChatInput({
       if (!isTyping && value.trim()) onSend();
     }
   };
+
+  const stopRecording = useCallback(() => {
+    recognitionRef.current?.stop();
+    setIsRecording(false);
+  }, []);
+
+  const startRecording = useCallback(() => {
+    const SpeechRecognitionAPI =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) return;
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = "en-US";
+    recognition.interimResults = true; // show words as they come
+    recognition.continuous = false;    // stop after first pause
+    recognitionRef.current = recognition;
+
+    // Snapshot the text already in the box before we start
+    const baseText = valueRef.current;
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let interim = "";
+      let final = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      // Show live transcription: base text + what we've heard so far
+      const appended = (final || interim).trim();
+      const separator = baseText.trim() ? " " : "";
+      onChange(baseText + (appended ? separator + appended : ""));
+      autoResize();
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+    setIsRecording(true);
+  }, [onChange]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  // Stop recording if component unmounts
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.abort();
+    };
+  }, []);
 
   const canSend = value.trim().length > 0 && !isTyping;
 
@@ -80,7 +178,6 @@ export default function ChatInput({
               fill="none"
               stroke="currentColor"
               strokeWidth="2.2"
-              
               className="transition-transform duration-200"
               style={{ transform: menuOpen ? "rotate(45deg)" : "rotate(0deg)" }}
             >
@@ -107,7 +204,7 @@ export default function ChatInput({
               autoResize();
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Enter a message..."
+            placeholder={isRecording ? "Listening…" : "Enter a message..."}
             rows={1}
             disabled={isTyping}
             className="flex-1 bg-transparent border-none mb-2 outline-none text-[15px] text-[#1e3a5f] resize-none leading-[1.55] font-['Inter',sans-serif] max-h-45 pt-0.5 placeholder:text-[#9DB3CC] disabled:opacity-70"
@@ -148,24 +245,65 @@ export default function ChatInput({
         {/* Mic button */}
         <button
           type="button"
-          title="Voice input"
-          className="w-11.5 h-11.5 rounded-full bg-[#F0F4FA] border-[1.5px] border-[#D1DDEF] cursor-pointer flex items-center justify-center text-[#7A95B8] shrink-0 mb-2 transition-all duration-150 hover:bg-[#E8F0FE] hover:border-[#1A56DB] hover:text-[#1A56DB] "
+          title={
+            !speechSupported
+              ? "Speech recognition not supported in this browser"
+              : isRecording
+              ? "Stop recording"
+              : "Voice input"
+          }
+          disabled={!speechSupported}
+          onClick={toggleRecording}
+          className={[
+            "relative w-11.5 h-11.5 rounded-full border-[1.5px] flex items-center justify-center shrink-0 mb-2 transition-all duration-150",
+            !speechSupported
+              ? "bg-[#F0F4FA] border-[#D1DDEF] text-[#C0CCD8] cursor-not-allowed opacity-50"
+              : isRecording
+              ? "bg-red-50 border-red-400 text-red-500 cursor-pointer"
+              : "bg-[#F0F4FA] border-[#D1DDEF] text-[#7A95B8] cursor-pointer hover:bg-[#E8F0FE] hover:border-[#1A56DB] hover:text-[#1A56DB]",
+          ].join(" ")}
         >
-          <svg
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-          >
-            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
-            <path d="M19 10v2a7 7 0 01-14 0v-2" />
-            <line x1="12" y1="19" x2="12" y2="23" />
-            <line x1="8" y1="23" x2="16" y2="23" />
-          </svg>
+          {isRecording && <RecordingRing />}
+
+          {isRecording ? (
+            // Stop icon while recording
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="relative z-10"
+            >
+              <rect x="6" y="6" width="12" height="12" rx="2" />
+            </svg>
+          ) : (
+            // Mic icon when idle
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+              <path d="M19 10v2a7 7 0 01-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          )}
         </button>
       </div>
+
+      {/* Recording status bar */}
+      {isRecording && (
+        <div className="max-w-200 mx-auto mt-1 flex items-center gap-2 pl-[calc(2.875rem+0.75rem+1.25rem)]">
+          <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-xs text-red-500 font-medium tracking-wide">
+            Recording… click the button again to stop
+          </span>
+        </div>
+      )}
     </div>
   );
 }

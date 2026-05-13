@@ -11,7 +11,7 @@ export default function TopNav() {
   const router = useRouter();
 
   return (
-    <div className="flex items-center justify-center gap-3.5 py-4.5 px-8 shrink-0 bg-white border-b border-[rgba(26,86,219,.06)]">
+    <div className="flex items-center justify-center gap-3.5 py-4.5 px-8 shrink-0 bg-white border-b border-[rgba(26,86,219,.06)] font-sans">
       {TABS.map((tab) => (
         <button
           key={tab.label}
