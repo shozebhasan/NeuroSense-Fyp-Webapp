@@ -12,7 +12,11 @@ interface BackPageLayoutProps {
   children: React.ReactNode;
 }
 
-export default function BackPageLayout({ title, accentColor, children }: BackPageLayoutProps) {
+export default function BackPageLayout({
+  title,
+  accentColor,
+  children,
+}: BackPageLayoutProps) {
   const router = useRouter();
 
   return (
@@ -35,7 +39,14 @@ export default function BackPageLayout({ title, accentColor, children }: BackPag
             hover:bg-[rgba(26,86,219,0.13)] hover:border-[rgba(26,86,219,0.35)]
           "
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
           Back
@@ -51,11 +62,14 @@ export default function BackPageLayout({ title, accentColor, children }: BackPag
               boxShadow: `0 0 0 3px ${accentColor}33`,
             }}
           />
-          <span
-            className="font-sans text-[20px] text-[#1A3A6B] uppercase tracking-[1px] font-bold"
-          >
+          <span className="font-sans text-[20px] text-[#1A3A6B] uppercase tracking-[1px] font-bold">
             {title}
           </span>
+        </div>
+        <div className="ml-auto">
+          <button className="bg-black text-white px-4 py-2 rounded cursor-pointer">
+            How It Works
+          </button>
         </div>
       </motion.div>
 

@@ -1,10 +1,28 @@
-import BackPageLayout from "@/components/BackPageLayout";
+"use client"
+
+import { useRouter } from "next/navigation";
 
 export default function TestPage() {
+  const router = useRouter();
   return (
-    <BackPageLayout title="Test" accentColor="#4A6FA5">
+    // main div
+    <div>
+      {/* top nav buttons div */}
+      <div className="flex justify-between px-4 py-2 bg-white">
+        <button
+          className="border bg-blue-50  text-blue-600 px-4 py-2 rounded cursor-pointer"
+          onClick={() => router.back()}
+        >
+          Go Back
+        </button>
+
+        <button className="bg-black text-white px-4 py-2 rounded cursor-pointer">
+          How It Works
+        </button>
+      </div>
+      <hr className="text-gray-400" />
       {/* heading */}
-      <div className="text-center">
+      <div className="text-center mt-3">
         <div className="border inline-block p-3 border-blue-600 bg-blue-200 rounded-lg">
           <p className="font-bold ">
             By attempting the tests below you will have an overview of your
@@ -12,7 +30,7 @@ export default function TestPage() {
           </p>
         </div>
       </div>
-      {/* main div */}
+      {/* cards div */}
       <div className="py-10 font-sans">
         {/* inner div */}
         <div className="flex flex-row justify-between px-40 gap-5">
@@ -38,6 +56,6 @@ export default function TestPage() {
           </div>
         </div>
       </div>
-    </BackPageLayout>
+    </div>
   );
 }
