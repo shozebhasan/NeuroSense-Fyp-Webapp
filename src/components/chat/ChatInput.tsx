@@ -40,6 +40,7 @@ declare global {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
   }
+  
 }
 
 export default function ChatInput({
@@ -104,7 +105,7 @@ export default function ChatInput({
     // Snapshot the text already in the box before we start
     const baseText = valueRef.current;
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => {
       let interim = "";
       let final = "";
 
