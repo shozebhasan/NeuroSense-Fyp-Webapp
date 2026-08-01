@@ -1,6 +1,5 @@
 "use client"
 
-import BackPageLayout from "@/components/BackPageLayout";
 import { useRouter } from "next/navigation";
 export default function ResultsPage() {
   const router = useRouter()

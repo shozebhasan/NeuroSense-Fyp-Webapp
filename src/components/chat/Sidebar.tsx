@@ -1,9 +1,6 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
-import { Red_Rose } from "next/font/google";
-
-const redrose = Red_Rose({ subsets: ["latin"], weight: "700" });
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Conversation {
   id: number;
@@ -32,7 +29,7 @@ function groupByDate(convs: Conversation[]) {
   for (const c of convs) {
     const d = new Date(c.updated_at);
     const label = `${String(d.getDate()).padStart(2, "0")}/${String(
-      d.getMonth() + 1
+      d.getMonth() + 1,
     ).padStart(2, "0")}/${d.getFullYear()}`;
     if (!groups[label]) groups[label] = [];
     groups[label].push(c);
@@ -79,102 +76,42 @@ export default function Sidebar({
 
   return (
     <>
-      <AnimatePresence mode="wait" initial={false}>
-
-        {/* ── COLLAPSED STRIP ── */}
-        {!open && (
-          <div
-            key="sb-strip"
-            className="w-17 min-w-17 h-screen flex flex-col items-center shrink-0 relative bg-blue-700"
-            
-          >
-            {/* Top logo area */}
-            <div className="w-full h-18 flex items-center justify-center border-b border-white/10 relative shrink-0">
-              <div className="w-8.5 h-8.5 rounded-[10px] bg-white/16 border border-white/22 flex items-center justify-center text-white text-xs font-bold tracking-[0.5px]">
-                NS
-              </div>
-
-              {/* Right-edge arrow to open */}
-              <button
-                onClick={onToggle}
-                title="Open sidebar"
-                className="absolute top-1/2 -right-3.25 -translate-y-1/2 w-6.5 h-6.5 rounded-full bg-[#1A56DB] border-2 border-white shadow-[0_2px_10px_rgba(26,86,219,0.38)] cursor-pointer flex items-center justify-center text-white z-30 transition-all duration-150 hover:bg-[#1547c2] hover:scale-110"
-              >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.8"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Icon buttons */}
-            <div className="flex-1 flex flex-col items-center pt-5 gap-2.5">
-              <button
-                className="w-10 h-10 rounded-full bg-white/[0.14] border-[1.5px] border-white/25 cursor-pointer flex items-center justify-center text-white transition-colors duration-150 hover:bg-white/24"
-                onClick={() => {
-                  onToggle();
-                  onNewChat();
-                }}
-                title="New chat"
-              >
-                <svg
-                  width="17"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* User avatar */}
-            <div className="pb-5">
-              <button
-                className="w-10 h-10 rounded-full bg-white/[0.14] border-[1.5px] border-white/25 cursor-pointer flex items-center justify-center text-white text-[11px] font-bold transition-colors duration-150 hover:bg-white/24"
-                onClick={onToggle}
-                title="Open sidebar"
-              >
-                {initials}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── EXPANDED PANEL ── */}
+      {/* Backdrop */}
+      <AnimatePresence>
         {open && (
-          <div
-            key="sb-expanded"
-            className="w-75 min-w-75 h-screen flex flex-col shrink-0 overflow-hidden border-r border-[rgba(26,86,219,0.10)] shadow-[4px_0_24px_rgba(26,86,219,0.07)]"
-            style={{
-              background: "rgba(232,242,255,0.92)",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-            }}
+          <motion.div
+            key="sb-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onToggle}
+            className="fixed inset-0 bg-black/30 z-40"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sliding panel — the ONLY thing this component renders */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="sb-panel"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed top-0 left-0 h-screen w-[280px] z-50 bg-white flex flex-col shadow-xl"
           >
             {/* Header */}
             <div
-              className="px-4 h-16 flex items-center justify-between shrink-0 gap-2.5"
-              style={{
-                background: "linear-gradient(135deg,#1A56DB 0%,#1e3fa8 100%)",
-              }}
+              className="px-4 h-16 flex items-center justify-between shrink-0 gap-2.5 border-b border-gray-200"
+              
             >
-              <span
-                className={`${redrose.className} text-white text-[19px] font-bold tracking-[1.2px] uppercase leading-none`}
-              >
-                Neuro Sense
+              <span className="text-2xl leading-none font-semibold text-blue-800">
+                Conversations
               </span>
               <button
-                className="bg-white/12 border border-white/20 rounded-lg cursor-pointer w-8 h-8 flex items-center justify-center text-white/90 transition-all duration-150 hover:bg-white/22 hover:text-white shrink-0"
+                className="border bg-blue-700 rounded-lg cursor-pointer w-8 h-8 flex items-center justify-center shrink-0 text-white font-bold"
                 onClick={onToggle}
                 title="Close sidebar"
               >
@@ -194,17 +131,18 @@ export default function Sidebar({
             {/* New Chat */}
             <div className="px-3.5 pt-3.5 pb-1.5">
               <button
-                className="w-full py-3 rounded-lg bg-blue-600 border-none cursor-pointer text-white text-[13px] font-bold tracking-[1.2px] uppercase transition-all duration-150  hover:bg-blue-700 hover:-translate-y-px hover:shadow-[0_6px_22px_rgba(26,86,219,0.40)] active:translate-y-0"
+                className="w-full py-3 rounded-lg bg-blue-600 border-none cursor-pointer text-white text-[13px] tracking-[1.2px]"
                 onClick={onNewChat}
               >
-                + New Chat
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white/30">
+                  +
+                </span>
+                New Chat
               </button>
             </div>
 
             {/* Conversation list */}
-            <div
-              className="flex-1 overflow-y-auto px-2.5 pb-2 pt-1 [&::-webkit-scrollbar]:w-0.75 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[rgba(26,86,219,0.18)] [&::-webkit-scrollbar-thumb]:rounded-sm [&::-webkit-scrollbar-thumb:hover]:bg-[rgba(26,86,219,0.34)]"
-            >
+            <div className="flex-1 overflow-y-auto px-2.5 pb-2 pt-1 [&::-webkit-scrollbar]:w-0.75 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[rgba(26,86,219,0.18)] [&::-webkit-scrollbar-thumb]:rounded-sm [&::-webkit-scrollbar-thumb:hover]:bg-[rgba(26,86,219,0.34)]">
               {convsLoading ? (
                 <div className="flex justify-center pt-9 text-[#1A56DB]">
                   <Spinner size={20} />
@@ -234,7 +172,7 @@ export default function Sidebar({
                   <div key={dateLabel}>
                     <div className="flex items-center gap-2 my-3.5 mx-1">
                       <div className="flex-1 h-px bg-[rgba(26,86,219,0.10)]" />
-                      <span className="text-[10px] font-extrabold text-[#7A9EC2] tracking-[0.5px] whitespace-nowrap uppercase">
+                      <span className="text-[10px] font-semibold tracking-[0.5px] whitespace-nowrap uppercase">
                         {dateLabel}
                       </span>
                       <div className="flex-1 h-px bg-[rgba(26,86,219,0.10)]" />
@@ -320,7 +258,7 @@ export default function Sidebar({
                   {initials}
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <p className="text-[13px] font-semibold text-[#122D6B] m-0 overflow-hidden text-ellipsis whitespace-nowrap font-sans">
+                  <p className="text-[13px] font-semibold text-[#122D6B] m-0 overflow-hidden text-ellipsis whitespace-nowrap">
                     {user?.name || "User"}
                   </p>
                   <p className="text-[11px] text-[#6B87B8] m-0 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -329,7 +267,7 @@ export default function Sidebar({
                 </div>
               </div>
               <button
-                className="w-full py-2.75 rounded-[50px] bg-transparent border-[1.5px] border-[rgba(239,68,68,0.40)] cursor-pointer text-[#EF4444] text-xs font-bold tracking-[1px] uppercase transition-all duration-150 flex items-center justify-center gap-1.75 hover:bg-[rgba(239,68,68,0.07)] hover:border-[rgba(239,68,68,0.65)] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-2.75 rounded-lg bg-red-500 cursor-pointer text-white text-xs font-bold tracking-[1px] uppercase flex items-center justify-center gap-1.75 disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={onLogout}
                 disabled={loggingOut}
               >
@@ -340,24 +278,13 @@ export default function Sidebar({
                   </>
                 ) : (
                   <>
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-                      <polyline points="16 17 21 12 16 7" />
-                      <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
+                    
                     Log Out
                   </>
                 )}
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

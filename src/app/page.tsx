@@ -71,7 +71,7 @@ export default function Home() {
     <div
       className="min-h-screen flex flex-col overflow-hidden"
       style={{
-        backgroundImage: "url('/kh5.jpg')",
+        backgroundImage: "url('')",
         backgroundSize: "cover",
         backgroundPosition: "center right",
         backgroundRepeat: "no-repeat",
@@ -186,7 +186,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
-        className="flex items-end justify-between px-8 pb-10 md:px-14 md:pb-12 "
+        className="flex items-end justify-between px-8 pb-10 md:px-14 md:pb-12 gap-5 "
       >
         <LiquidGlassButton  onClick={() => setTimeout(() => router.push("/signup"), 50)}>
           Signup For Free

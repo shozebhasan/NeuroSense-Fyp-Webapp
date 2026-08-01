@@ -17,7 +17,7 @@ export default function TopNav() {
           key={tab.label}
           onClick={() => router.push(tab.route)}
           //className="px-7 py-2.5 rounded-full border-none cursor-pointer text-[15px] font-bold tracking-[0.3px] transition-all duration-150"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-blue-100 hover:text-gray-700 transition disabled:opacity-50 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 rounded border border-gray-300 text-gray-600 text-sm font-medium hover:bg-blue-100 hover:text-gray-700 transition disabled:opacity-50 cursor-pointer"
           
           >
           {tab.label}

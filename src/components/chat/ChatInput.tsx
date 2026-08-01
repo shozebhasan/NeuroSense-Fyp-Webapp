@@ -195,7 +195,7 @@ export default function ChatInput({
         </div>
 
         {/* Text input pill */}
-        <div className="flex-1 flex items-end bg-white rounded-[26px] border-[1.5px] border-[#D1DDEF] px-5 py-2.5 pr-3.5 gap-2.5 transition-colors duration-150">
+        <div className="flex-1 flex items-end bg-white rounded-[26px] border-[1.5px] border-[#D1DDEF] px-5 py-2 pr-3.5 gap-2.5 transition-colors duration-150">
           <textarea
             ref={textareaRef}
             value={value}
@@ -255,7 +255,7 @@ export default function ChatInput({
           disabled={!speechSupported}
           onClick={toggleRecording}
           className={[
-            "relative w-11.5 h-11.5 rounded-full border-[1.5px] flex items-center justify-center shrink-0 mb-2 transition-all duration-150",
+            "relative w-11.5 h-11.5 rounded-full border-[1.5px] flex items-center justify-center shrink-0 mb-1 transition-all duration-150",
             !speechSupported
               ? "bg-[#F0F4FA] border-[#D1DDEF] text-[#C0CCD8] cursor-not-allowed opacity-50"
               : isRecording

@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
       <div
         className="min-h-screen flex flex-col"
         style={{
-          backgroundImage: "url('/kh5.jpg')",
+          backgroundImage: "url('')",
           backgroundSize: "cover",
           backgroundPosition: "center right",
           backgroundRepeat: "no-repeat",
@@ -154,7 +154,7 @@ export default function ForgotPasswordPage() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        backgroundImage: "url('/kh5.jpg')",
+        backgroundImage: "url('')",
         backgroundSize: "cover",
         backgroundPosition: "center right",
         backgroundRepeat: "no-repeat",

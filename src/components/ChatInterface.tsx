@@ -310,7 +310,28 @@ export default function ChatInterface({ user }: Props) {
     centerMode === "empty" && messages.length === 0 && !isTyping;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F7FAFF] font-sans">
+    <div className="relative flex h-screen overflow-hidden bg-[#F7FAFF] font-sans">
+      {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed top-4 left-4 z-50 h-10 w-10 rounded-lg bg-white border shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+          title="Open sidebar"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      )}
+
       <Sidebar
         open={sidebarOpen}
         onToggle={() => setSidebarOpen((v) => !v)}

@@ -51,7 +51,7 @@ function LoginForm() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        backgroundImage: "url('/kh5.jpg')",
+        backgroundImage: "url('')",
         backgroundSize: "cover",
         backgroundPosition: "center right",
         backgroundRepeat: "no-repeat",
@@ -59,10 +59,8 @@ function LoginForm() {
       }}
     >
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: "easeOut" }}
+      <header
+        
         className="flex items-center justify-between px-8 pt-8 md:px-14 md:pt-10"
       >
         <Link href="/" className="no-underline">
@@ -73,10 +71,8 @@ function LoginForm() {
           </h1>
         </Link>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8 }}
+        <div
+          
           className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500 bg-blue-50/70 backdrop-blur-sm"
         >
           <span className="relative flex h-2 w-2">
@@ -88,8 +84,8 @@ function LoginForm() {
           >
             SECURE LOGIN
           </span>
-        </motion.div>
-      </motion.header>
+        </div>
+      </header>
 
       {/* Main */}
       <main className="flex-1 flex items-center justify-center px-8 py-12 md:px-14">
@@ -98,15 +94,15 @@ function LoginForm() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
             className="mb-8"
           >
             
-            <span className={`${redrose.className}`}>
-            <h2 className="font-extrabold text-center text-4xl text-blue-700 leading-tight">
+            
+            <h2 className="text-center font-semibold sm:text-4xl text-3xl text-blue-700">
               Login To Your Account
             </h2>
-            </span>
+            
             <p className="text-slate-500 text-center text-base mt-2 font-medium">
               Continue your health analysis journey.
             </p>
@@ -116,8 +112,8 @@ function LoginForm() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="rounded-2xl border border-blue-100 bg-white/70 backdrop-blur-md shadow-xl shadow-blue-100/60 px-8 py-8"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="rounded-xl border border-blue-100 bg-white/70 backdrop-blur-md shadow-xl shadow-blue-100/60 px-8 py-8"
           >
             <form
               onSubmit={handleSubmit}
@@ -126,7 +122,7 @@ function LoginForm() {
               {/* Email */}
               <div>
                 <label
-                  className={`${spaceMono.className} block text-[11px] text-blue-600 tracking-widest uppercase mb-2`}
+                  className="block text-[11px] tracking-widest uppercase mb-2"
                 >
                   Email Address
                 </label>
@@ -152,13 +148,13 @@ function LoginForm() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label
-                    className={`${spaceMono.className} text-[11px] text-blue-600 tracking-widest uppercase`}
+                    className="text-[11px] tracking-widest uppercase"
                   >
                     Password
                   </label>
                   <Link
                     href="/forgot-password"
-                    className={`${spaceMono.className} text-[10px] text-slate-400 hover:text-blue-500 tracking-widest uppercase transition-colors no-underline`}
+                    className="text-[10px] text-slate-400 hover:text-blue-500 tracking-widest uppercase transition-colors no-underline"
                   >
                     Forgot password
                   </Link>

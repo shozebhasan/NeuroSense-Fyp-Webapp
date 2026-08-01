@@ -120,14 +120,12 @@ export default function ReportUploader({
         className="w-full max-w-140 flex flex-col gap-6"
       >
         {/* Header */}
-        <div className="text-center ">
-          <div className="w-14 h-14 rounded-2xl bg-[rgba(26,86,219,0.08)] border-[1.5px] border-[rgba(26,86,219,0.15)] flex items-center justify-center mx-auto mb-4 text-[26px]">
-            🩺
-          </div>
-          <h2 className="font-['Syne',sans-serif] text-[28px] font-extrabold text-[#1A56DB] mb-2 mt-0 tracking-[-0.5px]">
+        <div className="text-center sm:mt-10">
+          
+          <h2 className="text-[28px] font-extrabold text-[#1A56DB] mb-2 mt-0 tracking-[-0.5px]">
             Analyze Medical Report
           </h2>
-          <p className="text-sm text-[#6B87B8] m-0 leading-[1.65] font-['Inter',sans-serif]">
+          <p className="text-sm m-0 leading-[1.65]">
             Upload a medical PDF (lab results, prescriptions, diagnostic
             reports) and our AI will extract all findings, flag concerns, and
             explain everything in plain English.
@@ -148,7 +146,7 @@ export default function ReportUploader({
           ].map(([icon, text]) => (
             <div key={text} className="flex items-start gap-2.5">
               <span className="text-[15px] leading-5.5 shrink-0">{icon}</span>
-              <span className="text-[13px] text-[#2D4A7A] leading-normal ">
+              <span className="text-sm text-[#2D4A7A] leading-normal ">
                 {text}
               </span>
             </div>
@@ -188,7 +186,7 @@ export default function ReportUploader({
           {file ? (
             <div className="flex flex-col items-center gap-2">
               <span className="text-[32px]">📄</span>
-              <p className="text-sm font-semibold text-[#1e3a5f] m-0 font-['Inter',sans-serif]">
+              <p className="text-sm font-semibold text-[#1e3a5f] m-0">
                 {file.name}
               </p>
               <p className="text-xs text-[#8FA3BF] m-0 font-['Inter',sans-serif]">
@@ -201,7 +199,7 @@ export default function ReportUploader({
               <p className="text-sm font-semibold text-[#1e3a5f] m-0 font-['Inter',sans-serif]">
                 Drop your PDF here, or click to browse
               </p>
-              <p className="text-xs text-[#8FA3BF] m-0 font-['Inter',sans-serif]">
+              <p className="text-xs text-[#8FA3BF] m-0">
                 PDF only · Max 20 MB
               </p>
             </div>
@@ -286,7 +284,7 @@ export default function ReportUploader({
           </button>
         </div>
 
-        <p className="text-[11px] text-[#B0BEC5] text-center m-0 font-['Inter',sans-serif]">
+        <p className="text-md text-center m-0">
           Your report is processed securely and never shared.
         </p>
       </motion.div>

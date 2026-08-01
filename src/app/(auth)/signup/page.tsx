@@ -109,7 +109,7 @@ export default function SignupPage() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        backgroundImage: "url('/kh5.jpg')",
+        backgroundImage: "url('')",
         backgroundSize: "cover",
         backgroundPosition: "center right",
         backgroundRepeat: "no-repeat",
@@ -117,10 +117,8 @@ export default function SignupPage() {
       }}
     >
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: "easeOut" }}
+      <header
+        
         className="flex items-center justify-between px-8 pt-8 md:px-14 md:pt-10"
       >
         <Link href="/" className="no-underline">
@@ -131,10 +129,8 @@ export default function SignupPage() {
           </h1>
         </Link>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8 }}
+        <div
+          
           className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500 bg-blue-50/70 backdrop-blur-sm"
         >
           <span className="relative flex h-2 w-2">
@@ -146,8 +142,8 @@ export default function SignupPage() {
           >
             FREE SIGNUP
           </span>
-        </motion.div>
-      </motion.header>
+        </div>
+      </header>
 
       {/* Main */}
       <main className="flex-1 flex items-center justify-center px-8 py-10 md:px-14">
@@ -156,14 +152,14 @@ export default function SignupPage() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
             className="mb-8"
           >
-            <span className={`${redrose.className}`}>
-              <h2 className="font-extrabold text-center text-4xl text-blue-700 leading-tight">
+            
+              <h2 className="font-semibold text-blue-700 text-center sm:text-4xl text-3xl">
                 Create your account
               </h2>
-            </span>
+            
             <p className="text-slate-500 text-center text-base mt-2 font-medium">
               AI-powered health analysis, free forever.
             </p>
@@ -173,8 +169,8 @@ export default function SignupPage() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="rounded-2xl border border-blue-100 bg-white/70 backdrop-blur-md shadow-xl shadow-blue-100/60 px-8 py-8"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="rounded-xl border border-blue-100 bg-white/70 backdrop-blur-md shadow-xl shadow-blue-100/60 px-8 py-8"
           >
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Name + Email */}
@@ -190,7 +186,7 @@ export default function SignupPage() {
                 }) => (
                   <div key={id}>
                     <label
-                      className={`${spaceMono.className} block text-[11px] text-blue-600 font-medium tracking-widest uppercase mb-2`}
+                      className="block text-[11px] font-medium tracking-widest uppercase mb-2"
                     >
                       {label}
                     </label>
@@ -213,7 +209,7 @@ export default function SignupPage() {
               {/* Password */}
               <div>
                 <label
-                  className={`${spaceMono.className} block text-[11px] text-blue-600 tracking-widest uppercase mb-2`}
+                  className="block text-[11px] tracking-widest uppercase mb-2"
                 >
                   Password
                 </label>
@@ -293,7 +289,7 @@ export default function SignupPage() {
               {/* Confirm Password */}
               <div>
                 <label
-                  className={`${spaceMono.className} block text-[11px] text-blue-600 tracking-widest uppercase mb-2`}
+                  className="block text-[11px] tracking-widest uppercase mb-2"
                 >
                   Confirm Password
                 </label>
@@ -426,7 +422,7 @@ export default function SignupPage() {
 
               {/* Terms */}
               <p
-                className={`${spaceMono.className} text-center text-[10px] text-slate-400 font-medium tracking-wide`}
+                className="text-center text-[10px] text-slate-400 font-medium tracking-wide"
               >
                 By signing up you agree to our{" "}
                 <Link
