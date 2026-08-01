@@ -16,17 +16,11 @@ export interface Message {
 
 function TypingDots() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 0" }}>
+    <div className="flex items-center gap-1.5 py-1">
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: "#1A56DB",
-            opacity: 0.5,
-          }}
+          className="h-2 w-2 rounded-full bg-[#1A56DB] opacity-50"
           animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 0.75, repeat: Infinity, delay: i * 0.18 }}
         />
@@ -41,7 +35,11 @@ interface ChatMessagesProps {
   chatError: string;
 }
 
-export default function ChatMessages({ messages, isTyping, chatError }: ChatMessagesProps) {
+export default function ChatMessages({
+  messages,
+  isTyping,
+  chatError,
+}: ChatMessagesProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,67 +47,37 @@ export default function ChatMessages({ messages, isTyping, chatError }: ChatMess
   }, [messages, isTyping]);
 
   return (
-    <div
-      style={{
-        flex: 1,
-        overflowY: "auto",
-        padding: "24px 48px",
-      }}
-    >
-      <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-12">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <AnimatePresence>
           {messages.map((msg) => (
             <motion.div
               key={msg.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: msg.role === "user" ? "flex-end" : "flex-start",
-              }}
+              className={`flex flex-col ${
+                msg.role === "user" ? "items-end" : "items-start"
+              }`}
             >
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  color: "#8FA3BF",
-                  marginBottom: 5,
-                  paddingLeft: 4,
-                  paddingRight: 4,
-                }}
-              >
+              <span className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8FA3BF] sm:text-[11px]">
                 {msg.role === "user" ? "You" : "Neura"}
               </span>
+
               <div
-                style={{
-                  maxWidth: "78%",
-                  padding: "13px 18px",
-                  borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-                  background: msg.role === "user" ? "#E8F0FE" : "#fff",
-                  border: msg.role === "user" ? "1.5px solid #BAD0FB" : "1.5px solid #E5EDF8",
-                  color: "#1e3a5f",
-                  fontSize: 14,
-                  lineHeight: 1.65,
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                  boxShadow: "0 2px 10px rgba(26,86,219,0.07)",
-                }}
+                className={`max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm sm:max-w-[80%] sm:px-4 sm:py-3.5 sm:text-[14px] ${
+                  msg.role === "user"
+                    ? "rounded-br-sm border border-[#BAD0FB] bg-[#E8F0FE] text-[#1e3a5f]"
+                    : "rounded-bl-sm border border-[#E5EDF8] bg-white text-[#1e3a5f]"
+                }`}
               >
                 {formatMessage(msg.content)}
               </div>
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "#B0BEC5",
-                  marginTop: 4,
-                  paddingLeft: 4,
-                  paddingRight: 4,
-                }}
-              >
-                {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+
+              <span className="mt-1 px-1 text-[10px] text-[#B0BEC5]">
+                {msg.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </span>
             </motion.div>
           ))}
@@ -119,30 +87,12 @@ export default function ChatMessages({ messages, isTyping, chatError }: ChatMess
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
+            className="flex flex-col items-start"
           >
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: 1,
-                color: "#8FA3BF",
-                marginBottom: 5,
-                paddingLeft: 4,
-              }}
-            >
+            <span className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8FA3BF] sm:text-[11px]">
               Neuro Sense
             </span>
-            <div
-              style={{
-                padding: "13px 18px",
-                borderRadius: "18px 18px 18px 4px",
-                background: "#fff",
-                border: "1.5px solid #E5EDF8",
-                boxShadow: "0 2px 10px rgba(26,86,219,0.07)",
-              }}
-            >
+            <div className="rounded-2xl rounded-bl-sm border border-[#E5EDF8] bg-white px-4 py-3 shadow-sm">
               <TypingDots />
             </div>
           </motion.div>
@@ -152,22 +102,12 @@ export default function ChatMessages({ messages, isTyping, chatError }: ChatMess
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{
-              padding: "10px 16px",
-              borderRadius: 12,
-              background: "#FEF2F2",
-              border: "1px solid #FECACA",
-              color: "#EF4444",
-              fontSize: 13,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
+            className="flex items-center gap-2 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-2.5 text-sm text-[#EF4444]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
             </svg>
-            {chatError}
+            <span className="break-words">{chatError}</span>
           </motion.div>
         )}
 

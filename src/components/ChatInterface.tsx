@@ -2,14 +2,12 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { signOut } from "next-auth/react";
-
 import Sidebar from "@/components/chat/Sidebar";
-import TopNav from "@/components/chat/TopNav";
 import EmptyState from "@/components/chat/EmptyState";
 import ChatMessages, { Message } from "@/components/chat/ChatMessages";
 import ChatInput from "@/components/chat/ChatInput";
 import ReportUploader from "@/components/reports/ReportUploader";
-import ThemeToggle from "@/components/ThemeToggle";
+
 
 interface Conversation {
   id: number;
@@ -349,7 +347,7 @@ export default function ChatInterface({ user }: Props) {
       />
 
       <div className="flex-1 flex flex-col overflow-hidden bg-white">
-        <TopNav />
+        
 
         {/* Center section */}
         {showUploader && (
